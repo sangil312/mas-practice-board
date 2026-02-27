@@ -1,1 +1,64 @@
 server.port: 9000
+spring.application.name: article-api
+spring.profiles.active: local
+
+snowflake:
+  node-id: 1
+  start-time-millis: 1704067200000
+
+---
+
+spring.config.activate.on-profile: local
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/article
+    username: root
+    password: root
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: false
+    hibernate:
+      ddl-auto: create
+
+---
+
+spring.config.activate.on-profile: local-test
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:local-db;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show_log: true
+        format_sql: true
+    show-sql: true
+
+  sql.init.mode: never
+
+---
+
+spring.config.activate.on-profile: prod
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${database.article.url}
+    username: ${database.article.username}
+    password: ${database.article.password}
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: none
+
+snowflake:
+  node-id: ${SNOWFLAKE_NODE_ID}
+  start-time-millis: ${SNOWFLAKE_START_TIME_MILLIS:1704067200000}
