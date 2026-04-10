@@ -1,21 +1,15 @@
 plugins {
-    kotlin("jvm") version "2.2.21"
-    kotlin("kapt") version "2.2.21"
-    kotlin("plugin.spring") version "2.2.21"
-    kotlin("plugin.jpa") version "2.2.21"
-    id("org.springframework.boot") version "4.0.3"
-    id("io.spring.dependency-management") version "1.1.7"
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    kotlin("jvm")
+    kotlin("plugin.spring") apply false
+    kotlin("plugin.jpa") apply false
+    id("org.springframework.boot") apply false
+    id("io.spring.dependency-management")
+    id("org.jlleitschuh.gradle.ktlint") apply false
 }
 
 allprojects {
-    group = "dev"
-    version = "0.0.1-SNAPSHOT"
-    description = "msa-practice-board"
+    group = "${property("projectGroup")}"
+    version = "${property("applicationVersion")}"
 
     repositories {
         mavenCentral()
@@ -28,16 +22,22 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.plugin.jpa")
     apply(plugin = "org.springframework.boot")
     apply(plugin = "io.spring.dependency-management")
-    apply(plugin = "org.jetbrains.kotlin.kapt")
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
     dependencies {
-        implementation("org.springframework.boot:spring-boot-starter-webmvc")
         implementation("org.jetbrains.kotlin:kotlin-reflect")
         implementation("tools.jackson.module:jackson-module-kotlin")
 
-        testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+        testImplementation("org.springframework.boot:spring-boot-starter-test")
         testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+        testImplementation("com.ninja-squad:springmockk:5.0.1")
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of("${property("javaVersion")}")
+        }
     }
 
     kotlin {
@@ -46,14 +46,29 @@ subprojects {
         }
     }
 
+    tasks.named<Jar>("bootJar").configure {
+        enabled = false
+    }
+
+    tasks.named<Jar>("jar").configure {
+        enabled = true
+    }
+
     tasks.withType<Test> {
         useJUnitPlatform()
     }
-}
 
-dependencies {
-    implementation(kotlin("stdlib"))
-}
-repositories {
-    mavenCentral()
+    tasks.register<Test>("unitTest") {
+        group = "verification"
+        useJUnitPlatform {
+            excludeTags("integration")
+        }
+    }
+
+    tasks.register<Test>("integrationTest") {
+        group = "verification"
+        useJUnitPlatform {
+            includeTags("integration")
+        }
+    }
 }
