@@ -1,0 +1,28 @@
+server.port: 9100
+spring.application.name: api-docs-ui
+
+api-docs:
+  targets:
+    article: http://localhost:9000
+    comment: http://localhost:9001
+    like: http://localhost:9002
+    view: http://localhost:9003
+    hot-article: http://localhost:9004
+    article-read: http://localhost:9005
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui
+    urls:
+      - name: article
+        url: /api-docs/article
+      - name: comment
+        url: /api-docs/comment
+      - name: like
+        url: /api-docs/like
+      - name: view
+        url: /api-docs/view
+      - name: hot-article
+        url: /api-docs/hot-article
+      - name: article-read
+        url: /api-docs/article-read

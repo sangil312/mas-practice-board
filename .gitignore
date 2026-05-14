@@ -38,3 +38,8 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### AI Agent
+.claude/settings.json
+.claude/settings.local.json
+.claude/agent-memory

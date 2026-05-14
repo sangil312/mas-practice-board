@@ -29,6 +29,7 @@ class UserArgumentResolver : HandlerMethodArgumentResolver {
          */
         val userId = request.getHeader("Service-User-Id")
             ?: throw ApiException(ErrorType.INVALID_REQUEST)
+
         return User(userId.toLong())
     }
 }

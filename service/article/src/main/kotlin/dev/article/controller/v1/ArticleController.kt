@@ -8,6 +8,8 @@ import dev.article.support.response.Response
 import dev.article.service.ArticleService
 import dev.article.support.OffsetLimit
 import dev.article.support.auth.User
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,10 +21,12 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
+@Tag(name = "게시글 API")
 class ArticleController(
     private val articleService: ArticleService
 ) {
     @PostMapping("/v1/articles")
+    @Operation(summary = "게시글 생성")
     fun createArticle(
         user: User,
         @Valid @RequestBody request: CreateArticleRequest
@@ -32,6 +36,7 @@ class ArticleController(
     }
 
     @GetMapping("/v1/articles/{articleId}")
+    @Operation(summary = "게시글 상세 조회")
     fun findArticle(
         @PathVariable articleId: Long
     ): Response<ArticleResponse>  {
@@ -40,6 +45,7 @@ class ArticleController(
     }
 
     @GetMapping("/v1/articles")
+    @Operation(summary = "게시글 목록 조회")
     fun findArticles(
         @RequestParam boardId: Long,
         @RequestParam page: Long,
@@ -50,6 +56,7 @@ class ArticleController(
     }
 
     @PutMapping("/v1/articles/{articleId}")
+    @Operation(summary = "게시글 수정")
     fun updateArticle(
         user: User,
         @PathVariable articleId: Long,
@@ -60,6 +67,7 @@ class ArticleController(
     }
 
     @DeleteMapping("/v1/articles/{articleId}")
+    @Operation(summary = "게시글 삭제")
     fun deleteArticle(
         user: User,
         @PathVariable articleId: Long
