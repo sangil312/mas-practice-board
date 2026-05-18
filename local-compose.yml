@@ -1,0 +1,14 @@
+services:
+  redis:
+    image: redis:8.6
+    ports:
+      - "6379:6379"
+    command: redis-server --save "" --appendonly no
+
+  local-article-db:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: local-article-db

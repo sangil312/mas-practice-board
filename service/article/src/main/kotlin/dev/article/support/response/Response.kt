@@ -1,7 +1,9 @@
 package dev.article.support.response
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import dev.article.support.error.ErrorType
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class Response<T>(
     val result: ResultType,
     val data: T? = null,
