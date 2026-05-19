@@ -1,66 +1,61 @@
 package dev.article.repository
 
 import dev.article.domain.Article
+import dev.article.domain.EntityState
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
-import org.springframework.data.repository.query.Param
 
 interface ArticleRepository : JpaRepository<Article, Long> {
-    @Query(
-        """
-            select *
-            from article
-            where id = :articleId
-              and user_id = :userId
-              and state = 'ACTIVE'
-        """,
-        nativeQuery = true
-    )
-    fun findActiveByIdAndUserId(
-        @Param("articleId") articleId: Long,
-        @Param("userId") userId: Long
+    fun findByIdAndUserIdAndState(
+        articleId: Long,
+        userId: Long,
+        state: EntityState = EntityState.ACTIVE
+    ): Article?
+
+    fun findByIdAndState(
+        articleId: Long,
+        state: EntityState = EntityState.ACTIVE
     ): Article?
 
     @Query(
         """
-            select *
-            from article
-            where id = :articleId
-              and state = 'ACTIVE'
-        """,
-        nativeQuery = true
-    )
-    fun findActiveById(
-        @Param("articleId") articleId: Long
-    ): Article?
-
-    @Query(
-        """
-            select *
-            from article
-            where board_id = :boardId
-              and state = 'ACTIVE'
-            order by id desc
-            limit :limit offset :offset
+            select article.*
+            from article article
+            join (
+                select id
+                from article
+                where board_id = :boardId
+                  and state = :state
+                order by id desc
+                limit :limit offset :offset
+            ) sub on article.id = sub.id
+            order by article.id desc
         """,
         nativeQuery = true
     )
     fun findAll(
-        @Param("boardId") boardId: Long,
-        @Param("offset") offset: Long,
-        @Param("limit") limit: Long
+        boardId: Long,
+        offset: Int,
+        limit: Int,
+        state: String = EntityState.ACTIVE.name
     ): List<Article>
 
     @Query(
         """
             select count(*)
-            from article
-            where board_id = :boardId
-              and state = 'ACTIVE'
+            from (
+                select id
+                from article
+                where board_id = :boardId
+                    and state = :state
+                limit :limit
+            ) sub
         """,
         nativeQuery = true
     )
     fun count(
-        @Param("boardId") boardId: Long
+        boardId: Long,
+        limit: Int,
+        state: String = EntityState.ACTIVE.name
     ): Long
 }

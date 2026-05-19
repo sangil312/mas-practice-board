@@ -32,7 +32,7 @@ class ArticleService(
 
     @Transactional
     fun update(request: UpdateArticle): Article {
-        val article = articleRepository.findActiveByIdAndUserId(request.articleId, request.userId)
+        val article = articleRepository.findByIdAndUserIdAndState(request.articleId, request.userId)
             ?: throw ApiException(ErrorType.NOT_FOUND_DATA)
 
         article.update(request.title, request.content)
@@ -41,20 +41,20 @@ class ArticleService(
     }
 
     fun findArticle(articleId: Long): Article {
-        return articleRepository.findActiveById(articleId)
+        return articleRepository.findByIdAndState(articleId)
             ?: throw ApiException(ErrorType.NOT_FOUND_DATA)
     }
 
     fun findArticles(boardId: Long, offsetLimit: OffsetLimit): ArticleList {
         return ArticleList(
             articleRepository.findAll(boardId, offsetLimit.offset, offsetLimit.limit),
-            articleRepository.count(boardId)
+            articleRepository.count(boardId, offsetLimit.calculatePageLimit())
         )
     }
 
     @Transactional
     fun delete(user: User, articleId: Long) {
-        val article = articleRepository.findActiveByIdAndUserId(articleId, user.id)
+        val article = articleRepository.findByIdAndUserIdAndState(articleId, user.id)
             ?: throw ApiException(ErrorType.NOT_FOUND_DATA)
 
         article.delete()

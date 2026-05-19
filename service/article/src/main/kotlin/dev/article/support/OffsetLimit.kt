@@ -1,11 +1,15 @@
 package dev.article.support
 
 data class OffsetLimit private constructor(
-    val offset: Long,
-    val limit: Long,
+    val offset: Int,
+    val limit: Int,
 ) {
+    fun calculatePageLimit(): Int = limit * MOVEABLE_PAGE_COUNT
+
     companion object {
-        operator fun invoke(page: Long, size: Long) = OffsetLimit(
+        private const val MOVEABLE_PAGE_COUNT = 10
+
+        fun of(page: Int, size: Int) = OffsetLimit(
             offset = (page - 1) * size,
             limit = size,
         )

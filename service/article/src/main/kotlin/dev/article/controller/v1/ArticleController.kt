@@ -48,10 +48,10 @@ class ArticleController(
     @Operation(summary = "게시글 목록 조회")
     fun findArticles(
         @RequestParam boardId: Long,
-        @RequestParam page: Long,
-        @RequestParam size: Long
+        @RequestParam page: Int,
+        @RequestParam size: Int
     ): Response<ArticleListResponse>  {
-        val articleList = articleService.findArticles(boardId, OffsetLimit(page, size))
+        val articleList = articleService.findArticles(boardId, OffsetLimit.of(page, size))
         return Response.success(ArticleListResponse.of(articleList))
     }
 

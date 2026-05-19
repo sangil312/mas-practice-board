@@ -1,6 +1,7 @@
 package dev.article.service
 
 import dev.article.IntegrationTestSupport
+import dev.article.domain.Article
 import dev.article.repository.ArticleRepository
 import dev.article.service.request.CreateArticle
 import dev.article.service.request.UpdateArticle
@@ -8,6 +9,7 @@ import dev.article.support.OffsetLimit
 import dev.article.support.auth.User
 import dev.article.support.error.ApiException
 import dev.article.support.error.ErrorType
+import dev.snowflake.Snowflake
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -16,7 +18,8 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class ArticleServiceTest(
     private val articleService: ArticleService,
-    private val articleRepository: ArticleRepository
+    private val articleRepository: ArticleRepository,
+    private val snowflake: Snowflake
 ) : IntegrationTestSupport() {
 
     @Test
@@ -97,28 +100,26 @@ class ArticleServiceTest(
 
     @Test
     fun findArticle_notFoundData() {
-        assertThatThrownBy {
-            articleService.findArticle(999999L)
-        }
+        assertThatThrownBy { articleService.findArticle(999999L) }
             .isInstanceOf(ApiException::class.java)
             .hasMessage(ErrorType.NOT_FOUND_DATA.message)
     }
 
     @Test
     fun findArticles() {
-        val firstArticle = createArticle(title = "first", boardId = 1L)
-        val secondArticle = createArticle(title = "second", boardId = 1L)
-        val thirdArticle = createArticle(title = "third", boardId = 1L)
+        val article1 = createArticle(title = "first", boardId = 1L)
+        val article2 = createArticle(title = "second", boardId = 1L)
+        val article3 = createArticle(title = "third", boardId = 1L)
         createArticle(title = "other board", boardId = 2L)
 
-        val articleList = articleService.findArticles(1L, OffsetLimit(page = 1, size = 2))
+        val articleList = articleService.findArticles(1L, OffsetLimit.of(page = 1, size = 2))
 
         assertThat(articleList.totalCount).isEqualTo(3L)
         assertThat(articleList.articles).hasSize(2)
-        assertThat(articleList.articles.map { it.id }).containsExactly(thirdArticle.id, secondArticle.id)
+        assertThat(articleList.articles.map { it.id }).containsExactly(article3.id, article2.id)
         assertThat(articleList.articles.map { it.title }).containsExactly("third", "second")
         assertThat(articleList.articles.map { it.boardId }).containsOnly(1L)
-        assertThat(articleList.articles.map { it.id }).doesNotContain(firstArticle.id)
+        assertThat(articleList.articles.map { it.id }).doesNotContain(article1.id)
     }
 
     @Test
@@ -128,13 +129,11 @@ class ArticleServiceTest(
         articleService.delete(User(article.userId), article.id)
         articleRepository.flush()
 
-        assertThatThrownBy {
-            articleService.findArticle(article.id)
-        }
+        assertThatThrownBy { articleService.findArticle(article.id) }
             .isInstanceOf(ApiException::class.java)
             .hasMessage(ErrorType.NOT_FOUND_DATA.message)
-        assertThat(articleService.findArticles(3L, OffsetLimit(page = 1, size = 10)).articles).isEmpty()
-        assertThat(articleService.findArticles(3L, OffsetLimit(page = 1, size = 10)).totalCount).isZero()
+        assertThat(articleService.findArticles(3L, OffsetLimit.of(page = 1, size = 10)).articles).isEmpty()
+        assertThat(articleService.findArticles(3L, OffsetLimit.of(page = 1, size = 10)).totalCount).isZero()
     }
 
     @Test
@@ -153,8 +152,9 @@ class ArticleServiceTest(
         content: String = "content",
         boardId: Long = 1L,
         userId: Long = 10L
-    ) = articleService.create(
-        CreateArticle(
+    ) = articleRepository.save(
+        Article(
+            id = snowflake.nextId(),
             title = title,
             content = content,
             boardId = boardId,
