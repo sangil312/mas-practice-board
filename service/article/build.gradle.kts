@@ -1,5 +1,7 @@
 dependencies {
     implementation(project(":common:snowflake"))
+    implementation(project(":common:event"))
+    implementation(project(":common:outbox-message-relay"))
     implementation(project(":service:api-docs-ui"))
 
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")

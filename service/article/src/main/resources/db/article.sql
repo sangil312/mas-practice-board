@@ -13,5 +13,5 @@ CREATE TABLE article (
 
 CREATE TABLE board_article_count (
     board_id BIGINT NOT NULL primary key,
-    article_count BIGINT NOT NULL
+    article_count BIGINT NOT NULL DEFAULT 0
 );

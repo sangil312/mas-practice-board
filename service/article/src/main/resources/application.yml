@@ -44,7 +44,9 @@ spring:
   sql:
     init:
       mode: always
-      schema-locations: classpath:db/schema.sql
+      schema-locations: classpath:db/article.sql
+  kafka:
+    bootstrap-servers: 127.0.0.1:9092
 
 springdoc:
   packages-to-scan: dev.article.controller
@@ -75,42 +77,3 @@ spring:
         format_sql: true
 
   sql.init.mode: never
-
----
-
-spring.config.activate.on-profile: prod
-
-spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${database.article.url}
-    username: ${database.article.username}
-    password: ${database.article.password}
-    hikari:
-      maximum-pool-size: 5
-      connection-timeout: 1100
-      keepalive-time: 30000
-      validation-timeout: 1000
-      max-lifetime: 600000
-      pool-name: article-db-pool
-      data-source-properties:
-        socketTimeout: 3000
-        cachePrepStmts: true
-        prepStmtCacheSize: 250
-        prepStmtCacheSqlLimit: 2048
-        useServerPrepStmts: true
-        useLocalSessionState: true
-        rewriteBatchedStatements: true
-        cacheResultSetMetadata: true
-        cacheServerConfiguration: true
-        elideSetAutoCommits: true
-        maintainTimeStats: false
-  jpa:
-    database-platform: org.hibernate.dialect.MySQLDialect
-    hibernate:
-      ddl-auto: none
-  sql.init.mode: never
-
-snowflake:
-  node-id: ${SNOWFLAKE_NODE_ID}
-  start-time-millis: ${SNOWFLAKE_START_TIME_MILLIS:1704067200000}

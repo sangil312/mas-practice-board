@@ -1,13 +1,12 @@
-package dev.article.config
+package dev.snowflake
 
-import dev.snowflake.Snowflake
+import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 
-@Configuration
+@AutoConfiguration
 @EnableConfigurationProperties(SnowflakeProperties::class)
-class SnowflakeConfig {
+class SnowflakeAutoConfiguration {
     @Bean
     fun snowflake(properties: SnowflakeProperties): Snowflake {
         return Snowflake(

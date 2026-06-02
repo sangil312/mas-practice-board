@@ -15,11 +15,13 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ArticleService(
+    private val snowflake: Snowflake,
     private val articleRepository: ArticleRepository,
-    private val snowflake: Snowflake
+    private val boardArticleCountRepository: BoardArticleCountRepository,
+    private val articleEventHandler: ArticleEventHandler
 ) {
     fun create(request: CreateArticle) : Article {
-        return articleRepository.save(
+        val article = articleRepository.save(
             Article(
                 id = snowflake.nextId(),
                 title = request.title,
@@ -28,6 +30,17 @@ class ArticleService(
                 userId = request.userId
             )
         )
+
+        val result = boardArticleCountRepository.increase(request.boardId)
+        if (result == 0) {
+            boardArticleCountRepository.save(
+                BoardArticleCount(boardId = request.boardId, articleCount = 1)
+            )
+        }
+
+        articleEventHandler.createdArticleEvent(article)
+
+        return article
     }
 
     @Transactional
